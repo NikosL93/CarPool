@@ -72,7 +72,10 @@ export default function App() {
   const load = useCallback(async () => {
     try {
       const t = await dbGet("trips", "order=created_at.desc&limit=300");
-      t.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      t.sort((a, b) => {
+        const parse = d => { const [day, month, year] = d.split("/"); return new Date(year, month - 1, day); };
+        return parse(b.date) - parse(a.date);
+      });
       setTrips(t);
     } catch (e) {
       showToast("❌ Σφάλμα: " + e.message, "#ef4444");
@@ -317,7 +320,9 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  <button style={S.deleteBtn} onClick={() => setConfirmDelete(h.id)}>✕</button>
+                  {h.date === new Date().toLocaleDateString("el-GR") && (
+                    <button style={S.deleteBtn} onClick={() => setConfirmDelete(h.id)}>✕</button>
+                  )}
                 </div>
               );
             })}
